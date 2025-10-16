@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Grocery.App.Views.NewProductView"
+             Title="Nieuw product">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+            <Label Text="Vul de gegevens van het nieuwe product in." FontAttributes="Bold" />
+            <Label Text="Alleen beheerders kunnen nieuwe producten aanmaken." FontSize="12" TextColor="#666666" />
+
+            <StackLayout Spacing="4">
+                <Label Text="Naam" />
+                <Entry Text="{Binding Name}" Placeholder="Naam van het product" />
+            </StackLayout>
+
+            <StackLayout Spacing="4">
+                <Label Text="Voorraad" />
+                <Entry Text="{Binding Stock}" Keyboard="Numeric" Placeholder="Aantal stuks" />
+            </StackLayout>
+
+            <StackLayout Spacing="4">
+                <Label Text="Prijs" />
+                <Entry Text="{Binding Price}" Keyboard="Numeric" Placeholder="Prijs" />
+            </StackLayout>
+
+            <StackLayout Orientation="Horizontal" Spacing="10" VerticalOptions="Center">
+                <Switch IsToggled="{Binding ShelfLifeEnabled}" />
+                <Label Text="THT datum instellen" VerticalOptions="Center" />
+            </StackLayout>
+
+            <DatePicker Date="{Binding ShelfLife}" IsEnabled="{Binding ShelfLifeEnabled}" />
+
+            <Label Text="{Binding ErrorMessage}" TextColor="Red" IsVisible="{Binding HasError}" />
+
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Button Text="Opslaan"
+                        Command="{Binding SaveCommand}"
+                        IsEnabled="{Binding IsAdmin}"
+                        Grid.Column="0" />
+                <Button Text="Reset"
+                        Command="{Binding ResetCommand}"
+                        Grid.Column="1" />
+            </Grid>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

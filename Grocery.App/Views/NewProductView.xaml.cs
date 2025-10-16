@@ -1,10 +1,10 @@
-using Grocery.App.ViewModels;
+﻿using Grocery.App.ViewModels;
 
 namespace Grocery.App.Views;
 
-public partial class ProductView : ContentPage
+public partial class NewProductView : ContentPage
 {
-    public ProductView(ProductViewModel viewModel)
+    public NewProductView(NewProductViewModel viewModel)
     {
         InitializeComponent();
         BindingContext = viewModel;
@@ -13,7 +13,7 @@ public partial class ProductView : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        if (BindingContext is ProductViewModel viewModel)
+        if (BindingContext is NewProductViewModel viewModel)
         {
             viewModel.OnAppearing();
         }
@@ -22,7 +22,7 @@ public partial class ProductView : ContentPage
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-        if (BindingContext is ProductViewModel viewModel)
+        if (BindingContext is NewProductViewModel viewModel)
         {
             viewModel.OnDisappearing();
         }
