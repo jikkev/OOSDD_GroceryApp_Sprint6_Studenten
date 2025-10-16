@@ -6,8 +6,7 @@
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="16">
             <Label Text="Vul de gegevens van het nieuwe product in." FontAttributes="Bold" />
-            <Label Text="Alleen beheerders kunnen nieuwe producten aanmaken." FontSize="12" TextColor="#666666" />
-
+            
             <StackLayout Spacing="4">
                 <Label Text="Naam" />
                 <Entry Text="{Binding Name}" Placeholder="Naam van het product" />
