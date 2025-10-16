@@ -32,8 +32,14 @@ jobs:
       - name: Herstel afhankelijkheden voor de app
         run: dotnet restore Grocery.App/Grocery.App.csproj -p:TargetFramework=net8.0-android
 
+      - name: Herstel afhankelijkheden voor de bibliotheken
+        run: |
+          dotnet restore Grocery.Core/Grocery.Core.csproj
+          dotnet restore Grocery.Core.Data/Grocery.Core.Data.csproj
+
       - name: Herstel afhankelijkheden voor tests
         run: dotnet restore TestCore/TestCore.csproj
+
 
       - name: Bouw alleen de Android-app
         run: dotnet build Grocery.App/Grocery.App.csproj --configuration Release --no-restore -f net8.0-android
