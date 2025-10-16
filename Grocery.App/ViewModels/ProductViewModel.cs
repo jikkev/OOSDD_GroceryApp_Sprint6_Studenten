@@ -43,6 +43,7 @@ namespace Grocery.App.ViewModels
         {
             base.OnAppearing();
             UpdateAccess();
+            LoadProducts();
         }
 
         private void LoadProducts()
