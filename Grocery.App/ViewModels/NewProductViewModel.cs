@@ -1,150 +1,191 @@
-﻿
+﻿using System;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Grocery.Core.Interfaces.Services;
 using Grocery.Core.Models;
-using System;
-using System.Globalization;
 
+namespace Grocery.App.ViewModels;
 
-namespace Grocery.App.ViewModels
+public class NewProductViewModel : BaseViewModel
 {
-    public partial class NewProductViewModel : BaseViewModel
+    private readonly IProductService _productService;
+    private readonly GlobalViewModel _global;
+
+    private string _name = string.Empty;
+    private string _stock = "0";
+    private string _price = "0";
+    private DateTime _shelfLife = DateTime.Today;
+    private bool _shelfLifeEnabled;
+    private string? _errorMessage;
+    private bool _hasError;
+    private Product? _createdProduct;
+    private bool _isAdmin;
+
+    public NewProductViewModel(IProductService productService, GlobalViewModel global)
     {
-        private readonly IProductService _productService;
-        private readonly GlobalViewModel _global;
+        Title = "Nieuw product";
+        _productService = productService;
+        _global = global;
 
-        [ObservableProperty]
-        private string name = string.Empty;
+        SaveCommand = new RelayCommand(Save, () => IsAdmin);
+        ResetCommand = new RelayCommand(Reset);
+    }
 
-        [ObservableProperty]
-        private string stock = "0";
+    public string Name
+    {
+        get => _name;
+        set => SetProperty(ref _name, value);
+    }
 
-        [ObservableProperty]
-        private string price = "0";
+    public string Stock
+    {
+        get => _stock;
+        set => SetProperty(ref _stock, value);
+    }
 
-        [ObservableProperty]
-        private DateTime shelfLife = DateTime.Today;
+    public string Price
+    {
+        get => _price;
+        set => SetProperty(ref _price, value);
+    }
 
-        [ObservableProperty]
-        private bool shelfLifeEnabled;
+    public DateTime ShelfLife
+    {
+        get => _shelfLife;
+        set => SetProperty(ref _shelfLife, value);
+    }
 
-        [ObservableProperty]
-        private string? errorMessage;
+    public bool ShelfLifeEnabled
+    {
+        get => _shelfLifeEnabled;
+        set => SetProperty(ref _shelfLifeEnabled, value);
+    }
 
-        [ObservableProperty]
-        private bool hasError;
-
-        [ObservableProperty]
-        private Product? createdProduct;
-
-        [ObservableProperty]
-        private bool isAdmin;
-
-        public NewProductViewModel(IProductService productService, GlobalViewModel global)
+    public string? ErrorMessage
+    {
+        get => _errorMessage;
+        private set
         {
-            Title = "Nieuw product";
-            _productService = productService;
-            _global = global;
-        }
-
-        public override void OnAppearing()
-        {
-            base.OnAppearing();
-            UpdateAccess();
-            ResetForm();
-        }
-
-        [RelayCommand(CanExecute = nameof(IsAdmin))]
-        private void Save()
-        {
-            if (!IsAdmin)
+            if (SetProperty(ref _errorMessage, value))
             {
-                SetError("Alleen beheerders kunnen nieuwe producten aanmaken.");
-                return;
-            }
-
-            string trimmedName = Name.Trim();
-            if (string.IsNullOrWhiteSpace(trimmedName))
-            {
-                SetError("Naam is verplicht.");
-                return;
-            }
-
-            if (!int.TryParse(Stock?.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int stockValue) || stockValue < 0)
-            {
-                SetError("Voorraad moet een positief geheel getal zijn.");
-                return;
-            }
-
-            string priceInput = Price?.Trim() ?? string.Empty;
-            if (!decimal.TryParse(priceInput, NumberStyles.Number, CultureInfo.CurrentCulture, out decimal priceValue) || priceValue < 0)
-            {
-                if (!decimal.TryParse(priceInput, NumberStyles.Number, CultureInfo.InvariantCulture, out priceValue) || priceValue < 0)
-                {
-                    SetError("Prijs moet een positief getal zijn.");
-                    return;
-                }
-            }
-
-            DateOnly shelfLifeValue = ShelfLifeEnabled
-                ? DateOnly.FromDateTime(ShelfLife)
-                : default;
-
-            Product newProduct = new(0, trimmedName, stockValue, shelfLifeValue, priceValue);
-
-            try
-            {
-                CreatedProduct = _productService.Add(newProduct);
-                ClearError();
-                ResetForm();
-            }
-            catch (Exception ex)
-            {
-                SetError(ex.Message);
-                CreatedProduct = null;
+                HasError = !string.IsNullOrWhiteSpace(value);
             }
         }
+    }
 
-        [RelayCommand]
-        private void Reset()
+    public bool HasError
+    {
+        get => _hasError;
+        private set => SetProperty(ref _hasError, value);
+    }
+
+    public Product? CreatedProduct
+    {
+        get => _createdProduct;
+        private set => SetProperty(ref _createdProduct, value);
+    }
+
+    public bool IsAdmin
+    {
+        get => _isAdmin;
+        private set
         {
-            ResetForm();
+            if (SetProperty(ref _isAdmin, value))
+            {
+                SaveCommand.NotifyCanExecuteChanged();
+            }
+        }
+    }
+
+    public IRelayCommand SaveCommand { get; }
+
+    public IRelayCommand ResetCommand { get; }
+
+    public override void OnAppearing()
+    {
+        base.OnAppearing();
+        UpdateAccess();
+        ResetForm();
+    }
+
+    private void Save()
+    {
+        if (!IsAdmin)
+        {
+            SetError("Alleen beheerders kunnen nieuwe producten aanmaken.");
+            return;
+        }
+
+        string trimmedName = (Name ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(trimmedName))
+        {
+            SetError("Naam is verplicht.");
+            return;
+        }
+
+        if (!int.TryParse(Stock?.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int stockValue) || stockValue < 0)
+        {
+            SetError("Voorraad moet een positief geheel getal zijn.");
+            return;
+        }
+
+        string priceInput = Price?.Trim() ?? string.Empty;
+        if (!decimal.TryParse(priceInput, NumberStyles.Number, CultureInfo.CurrentCulture, out decimal priceValue) || priceValue < 0)
+        {
+            if (!decimal.TryParse(priceInput, NumberStyles.Number, CultureInfo.InvariantCulture, out priceValue) || priceValue < 0)
+            {
+                SetError("Prijs moet een positief getal zijn.");
+                return;
+            }
+        }
+
+        DateOnly shelfLifeValue = ShelfLifeEnabled
+            ? DateOnly.FromDateTime(ShelfLife)
+            : default;
+
+        Product newProduct = new(0, trimmedName, stockValue, shelfLifeValue, priceValue);
+
+        try
+        {
+            CreatedProduct = _productService.Add(newProduct);
             ClearError();
+            ResetForm();
         }
-
-        private void UpdateAccess()
+        catch (Exception ex)
         {
-            IsAdmin = _global.Client?.Role == Role.Admin;
+            SetError(ex.Message);
+            CreatedProduct = null;
         }
+    }
 
-        partial void OnIsAdminChanged(bool value)
-        {
-            SaveCommand.NotifyCanExecuteChanged();
-        }
+    private void Reset()
+    {
+        ResetForm();
+        ClearError();
+    }
 
-        partial void OnErrorMessageChanged(string? value)
-        {
-            HasError = !string.IsNullOrWhiteSpace(value);
-        }
+    private void UpdateAccess()
+    {
+        IsAdmin = _global.Client?.Role == Role.Admin;
+    }
 
-        private void ResetForm()
-        {
-            Name = string.Empty;
-            Stock = "0";
-            Price = "0";
-            ShelfLife = DateTime.Today;
-            ShelfLifeEnabled = false;
-        }
+    private void ResetForm()
+    {
+        Name = string.Empty;
+        Stock = "0";
+        Price = "0";
+        ShelfLife = DateTime.Today;
+        ShelfLifeEnabled = false;
+    }
 
-        private void SetError(string message)
-        {
-            ErrorMessage = message;
-        }
+    private void SetError(string message)
+    {
+        ErrorMessage = message;
+    }
 
-        private void ClearError()
-        {
-            ErrorMessage = null;
-        }
+    private void ClearError()
+    {
+        ErrorMessage = null;
     }
 }
