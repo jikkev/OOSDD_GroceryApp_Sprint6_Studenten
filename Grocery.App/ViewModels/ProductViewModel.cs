@@ -45,6 +45,16 @@ namespace Grocery.App.ViewModels
             UpdateAccess();
         }
 
+        private void LoadProducts()
+        {
+            Products.Clear();
+
+            foreach (Product product in _productService.GetAll())
+            {
+                Products.Add(product);
+            }
+        }
+
         private void UpdateAccess()
         {
             CanCreateProduct = _global.Client?.Role == Role.Admin;

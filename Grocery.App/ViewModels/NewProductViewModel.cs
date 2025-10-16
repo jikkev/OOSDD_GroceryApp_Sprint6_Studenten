@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Grocery.Core.Interfaces.Services;
@@ -28,7 +29,7 @@ public class NewProductViewModel : BaseViewModel
         _productService = productService;
         _global = global;
 
-        SaveCommand = new RelayCommand(Save, () => IsAdmin);
+        SaveCommand = new AsyncRelayCommand(SaveAsync, () => IsAdmin);
         ResetCommand = new RelayCommand(Reset);
     }
 
@@ -98,7 +99,7 @@ public class NewProductViewModel : BaseViewModel
         }
     }
 
-    public IRelayCommand SaveCommand { get; }
+    public IAsyncRelayCommand SaveCommand { get; }
 
     public IRelayCommand ResetCommand { get; }
 
@@ -109,7 +110,7 @@ public class NewProductViewModel : BaseViewModel
         ResetForm();
     }
 
-    private void Save()
+    private async Task SaveAsync()
     {
         if (!IsAdmin)
         {
@@ -151,6 +152,8 @@ public class NewProductViewModel : BaseViewModel
             CreatedProduct = _productService.Add(newProduct);
             ClearError();
             ResetForm();
+
+            await Shell.Current.GoToAsync("..");
         }
         catch (Exception ex)
         {
